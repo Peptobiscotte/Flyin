@@ -62,7 +62,9 @@ def bfs(graph: dict[str, list[str]], start: str, end: str) -> list[str]:
     return path
     
 
-def dijkstra(graph, start, end) -> None:
+def dijkstra(graph, start, end) -> list[str]:
+    if start not in graph or end not in graph:
+        return []
     visited = set()
     parent = {}
     distances = {
@@ -71,7 +73,8 @@ def dijkstra(graph, start, end) -> None:
     }
     distances[start] = 0
     
-    def find_lowcost(distances: dict[str, int]) -> str:
+    def find_lowcost() -> str | None:
+        
         min = float("inf")
         key_min = None
         for key, value in distances.items():
@@ -81,24 +84,44 @@ def dijkstra(graph, start, end) -> None:
         return key_min
             
     while True:
-        node = find_lowcost(distances)
+        node = find_lowcost()
 
         if node is None:
             break
 
         if node == end:
             break
-        for neighbour, cost in graph[node]:
+        for neighbour, cost in graph.get(node, []):
             new_cost = distances[node] + cost
             if new_cost < distances[neighbour]:
                 distances[neighbour] = new_cost
                 parent[neighbour] = node
 
         visited.add(node)
-    
+
+    if distances[end] == float("inf"):
+        return []    
+    path = []
+    current = end
+        
+    while current != start:
+        path.append(current)
+        current = parent[current]
+
+    path.append(start)
+    path.reverse()
+    print(path)
+    print(distances[end])
+    return path
 
 
 if __name__ == "__main__":
+    graph_cost = {
+        "A": [("B", 100), ("C", 1)],
+        "B": [("A", 100), ("D", 1)],
+        "C": [("A", 1), ("D", 1)],
+        "D": [("B", 1), ("C", 1)],
+    }    
     graph = {
         "A": ["B", "C"],
         "B": ["A", "D"],
@@ -108,12 +131,6 @@ if __name__ == "__main__":
         "F": ["C"],
         "G": ["D", "E"],
     }
-    graph_cost = {
-        "A": [("B", 100), ("C", 1)],
-        "B": [("A", 100), ("D", 1)],
-        "C": [("A", 1), ("D", 1)],
-        "D": [("B", 1), ("C", 1)],
-    }    
     start = "A"
     # dfs(graph)
     # dfs_it(graph, start)
